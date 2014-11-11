@@ -94,6 +94,8 @@ class GAApiController(ApiController):
                     id = request_data['q']
                 if 'query' in request_data:
                     id = request_data['query']
+                if 'resource_id' in request_data:
+                    id = request_data['resource_id']
                 self._post_analytics(c.user, logic_function, '', id)
         except Exception, e:
             log.debug(e)
