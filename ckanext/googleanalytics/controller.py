@@ -151,3 +151,4 @@ class GAApiController(ApiController):
             log.debug(str(e))
             pass
         self._post_analytics(c.user, register, "search", id)
+        return ApiController.search(self, ver, register)
