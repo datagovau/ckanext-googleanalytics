@@ -11,6 +11,13 @@ this.ckan.module('google-analytics', function(jQuery, _) {
             ga('send', 'event', 'Resource', 'Download', resource_url);
           }
       });
+        jQuery('a.searchpartnership-url-analytics').on('click', function() {
+            var dataset_url = encodeURIComponent(jQuery(this).prop('href'));
+            var dataset_portal = encodeURIComponent(jQuery(this).attr('data-portal'));
+            if (dataset_url) {
+                ga('send', 'event', 'Search Partnership Redirect', dataset_portal, dataset_url);
+            }
+        });
     }
   }
 });
