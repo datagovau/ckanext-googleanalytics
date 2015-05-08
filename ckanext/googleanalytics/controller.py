@@ -8,7 +8,7 @@ import urllib2
 import logging
 import ckan.logic as logic
 import hashlib
-import threading
+import plugin
 from pylons import config
 
 from webob.multidict import UnicodeMultiDict
@@ -48,12 +48,7 @@ class GAApiController(ApiController):
             data = urllib.urlencode(data_dict)
             log.debug("Sending API event to Google Analytics: "+data)
             # send analytics asynchronously
-            threading.Thread(target=urllib2.urlopen,
-                             args=(
-                                 "http://www.google-analytics.com/collect",
-                                 data,
-                                 # timeout in seconds https://docs.python.org/2/library/urllib2.html#urllib2.urlopen
-                                 10)).start()
+            plugin.GoogleAnalyticsPlugin.analytics_queue.put(data_dict)
 
     def action(self, logic_function, ver=None):
         try:
