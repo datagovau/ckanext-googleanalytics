@@ -9,6 +9,7 @@ import logging
 import ckan.logic as logic
 import hashlib
 import plugin
+import re
 from pylons import config
 
 from webob.multidict import UnicodeMultiDict
@@ -64,9 +65,13 @@ class GAApiController(ApiController):
                     id = request_data['query']
                 if 'resource_id' in request_data:
                     id = request_data['resource_id']
+		if 'sql' in request_data:
+		    uuidregex = re.compile('[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}')
+		    for uuid in uuidregex.findall(request_data['sql']):
+			id = uuid
                 self._post_analytics(c.user, logic_function, '', id)
         except Exception, e:
-            log.debug(e)
+            log.error(e)
             pass
 
         return ApiController.action(self, logic_function, ver)
