@@ -8,7 +8,7 @@ import pylons
 import ckan.lib.helpers as h
 import ckan.plugins as p
 import gasnippet
-from routes.mapper import SubMapper, Mapper as _Mapper
+from routes.mapper import SubMapper
 
 import urllib2
 
