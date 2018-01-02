@@ -64,6 +64,7 @@ class GoogleAnalyticsPlugin(p.SingletonPlugin):
             msg = "Missing googleanalytics.id in config"
             raise GoogleAnalyticsException(msg)
         self.googleanalytics_id = config['googleanalytics.id']
+        self.googletagmanager_id = config['googletagmanager.id']
         self.googleanalytics_domain = config.get(
                 'googleanalytics.domain', 'auto')
         self.googleanalytics_javascript_url = h.url_for_static(
@@ -185,7 +186,7 @@ class GoogleAnalyticsPlugin(p.SingletonPlugin):
 
         # Add the Google Analytics tracking code into the page header.
         header_code = genshi.HTML(gasnippet.header_code
-            % (self.googleanalytics_id, self.googleanalytics_domain))
+            % (self.googleanalytics_id, self.googletagmanager_id, self.googleanalytics_domain))
         stream = stream | genshi.filters.Transformer('head').append(
                 header_code)
 
@@ -264,6 +265,7 @@ class GoogleAnalyticsPlugin(p.SingletonPlugin):
 
         '''
         data = {'googleanalytics_id': self.googleanalytics_id,
+                'googletagmanager_id': self.googletagmanager_id,
                 'googleanalytics_domain': self.googleanalytics_domain}
         return p.toolkit.render_snippet(
             'googleanalytics/snippets/googleanalytics_header.html', data)
