@@ -185,8 +185,7 @@ class GoogleAnalyticsPlugin(p.SingletonPlugin):
         log.info("Inserting Google Analytics code into template")
 
         # Add the Google Analytics tracking code into the page header.
-        header_code = genshi.HTML(gasnippet.header_code
-            % (self.googleanalytics_id, self.googletagmanager_id, self.googleanalytics_domain))
+        header_code = genshi.HTML(gasnippet.header_code % self.googletagmanager_id)
         stream = stream | genshi.filters.Transformer('head').append(
                 header_code)
 
