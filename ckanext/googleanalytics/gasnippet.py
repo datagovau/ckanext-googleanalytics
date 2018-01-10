@@ -2,6 +2,7 @@ header_code = """
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', '%s']);
+  _gaq.push(['_setGTMCode', '%s']);
   _gaq.push(['_setDomainName', '%s']);
   _gaq.push(['_trackPageview']);
   (function() {
