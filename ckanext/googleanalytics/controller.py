@@ -4,38 +4,57 @@ import re
 import urllib
 
 import ckan.logic as logic
+from ckan.common import config
+from ckan.controllers.package import PackageController
 from ckan.controllers.api import ApiController
 from ckan.lib.base import c, request
 from paste.util.multidict import MultiDict
-from pylons import config
 
 import plugin
 
 log = logging.getLogger('ckanext.googleanalytics')
 
 
+def _post_analytics(category, action, label):
+    if config.get('googleanalytics.id'):
+        data_dict = {
+            "v": 1,
+            "tid": config.get('googleanalytics.id'),
+            "cid": hashlib.md5(c.user or c.environ.get('X-Forwarded-For') or c.environ.get('X-Real-IP') or c.remote_addr).hexdigest(),
+            # customer id should be obfuscated
+            "t": "event",
+            "dh": c.environ['HTTP_HOST'],
+            "dp": c.environ['PATH_INFO'],
+            "dr": c.environ.get('HTTP_REFERER', ''),
+            "ec": category,
+            "ea": action,
+            "el": label
+        }
+        data = urllib.urlencode(data_dict)
+        log.debug("Sending event to queue: " + data)
+        # send analytics asynchronously
+        plugin.GoogleAnalyticsPlugin.analytics_queue.put(data_dict)
+
+
+class GAPackageController(PackageController):
+
+    def resource_download(self, id, resource_id, filename=None):
+        try:
+            if config.get('ckan.site_url') not in c.environ.get('HTTP_REFERER', '') \
+                    and all(k not in c.environ.get('HTTP_USER_AGENT', '').lower() for k in ['okhttp', 'pingdom', 'bot']):
+                        _post_analytics('Resource', 'Download',
+                                        urllib.quote(config.get('ckan.site_url', '')+c.environ['PATH_INFO'], ''))
+        except Exception, e:
+            log.debug(e)
+            pass
+
+        return PackageController.resource_download(self, id, resource_id, filename)
+
+
 class GAApiController(ApiController):
     # intercept API calls to record via google analytics
-    def _post_analytics(
-            self, user, request_obj_type, request_function, request_id):
-        if config.get('googleanalytics.id'):
-            data_dict = {
-                "v": 1,
-                "tid": config.get('googleanalytics.id'),
-                "cid": hashlib.md5(user).hexdigest(),
-                # customer id should be obfuscated
-                "t": "event",
-                "dh": c.environ['HTTP_HOST'],
-                "dp": c.environ['PATH_INFO'],
-                "dr": c.environ.get('HTTP_REFERER', ''),
-                "ec": "CKAN API Request",
-                "ea": request_obj_type + request_function,
-                "el": request_id,
-            }
-            data = urllib.urlencode(data_dict)
-            log.debug("Sending API event to Google Analytics: " + data)
-            # send analytics asynchronously
-            plugin.GoogleAnalyticsPlugin.analytics_queue.put(data_dict)
+    def _post_api_analytics(self, user, request_obj_type, request_function, request_id):
+        _post_analytics(user, "CKAN API Request", request_obj_type + request_function, request_id)
 
     def action(self, logic_function, ver=None):
         try:
@@ -55,7 +74,7 @@ class GAApiController(ApiController):
                     uuidregex = re.compile('[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}')
                     for uuid in uuidregex.findall(request_data['sql']):
                         id = uuid
-                self._post_analytics(c.user, logic_function, '', id)
+                self._post_analytics(logic_function, '', id)
         except Exception, e:
             log.debug(e)
             pass
