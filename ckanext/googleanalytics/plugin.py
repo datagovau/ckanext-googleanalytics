@@ -31,7 +31,7 @@ class AnalyticsPostThread(threading.Thread):
             data_dict = self.queue.get()
 
             data = urllib.urlencode(data_dict)
-            log.debug("Sending API event to Google Analytics: " + data)
+            log.debug("Sending event to Google Analytics: " + data)
             # send analytics
             urllib2.urlopen(
                 "http://www.google-analytics.com/collect",
@@ -46,6 +46,7 @@ class AnalyticsPostThread(threading.Thread):
 
 class GoogleAnalyticsPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurable, inherit=True)
+
     p.implements(p.IRoutes, inherit=True)
     p.implements(p.IConfigurer, inherit=True)
     p.implements(p.ITemplateHelpers)
@@ -116,6 +117,13 @@ class GoogleAnalyticsPlugin(p.SingletonPlugin):
         POST = dict(method=['POST'])
         DELETE = dict(method=['DELETE'])
         GET_POST = dict(method=['GET', 'POST'])
+        # intercept downloads
+        map.connect('/dataset/{id}/resource/{resource_id}/download',
+                  controller='ckanext.googleanalytics.controller:GAPackageController',
+                  action='resource_download')
+        map.connect('/dataset/{id}/resource/{resource_id}/download/{filename}',
+                  controller='ckanext.googleanalytics.controller:GAPackageController',
+                  action='resource_download')
         # intercept API calls that we want to capture analytics on
         register_list = [
             'package',
