@@ -91,7 +91,7 @@ class GAApiController(ApiController):
 
     def show(self, ver=None, register=None,
              subregister=None, id=None, id2=None):
-        _post_analytics("CKAN API Request",,
+        _post_analytics("CKAN API Request",
                              register +
                              ("_" + str(subregister) if subregister else ""),
                              "show",
