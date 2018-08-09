@@ -83,8 +83,8 @@ class GAApiController(ApiController):
              subregister=None, id=None):
         _post_analytics("CKAN API Request",
                              register +
-                             ("_" + str(subregister) if subregister else "")+
-                             "list",
+                             ("_" + str(subregister) if subregister else "") +
+                             "_list",
                              id)
         return ApiController.list(self, ver, register, subregister, id)
 
@@ -93,8 +93,8 @@ class GAApiController(ApiController):
              subregister=None, id=None, id2=None):
         _post_analytics("CKAN API Request",
                              register +
-                             ("_" + str(subregister) if subregister else ""),
-                             "show",
+                             ("_" + str(subregister) if subregister else "") +
+                             "_show",
                              id)
         return ApiController.show(self, ver, register, subregister, id, id2)
 
@@ -103,8 +103,8 @@ class GAApiController(ApiController):
                subregister=None, id=None, id2=None):
         _post_analytics("CKAN API Request",
                              register +
-                             ("_" + str(subregister) if subregister else ""),
-                             "update",
+                             ("_" + str(subregister) if subregister else "") +
+                             "_update",
                              id)
         return ApiController.update(self, ver, register, subregister, id, id2)
 
@@ -113,8 +113,8 @@ class GAApiController(ApiController):
                subregister=None, id=None, id2=None):
         _post_analytics("CKAN API Request",
                              register +
-                             ("_" + str(subregister) if subregister else ""),
-                             "delete",
+                             ("_" + str(subregister) if subregister else "") +
+                             "_delete",
                              id)
         return ApiController.delete(self, ver, register, subregister, id, id2)
 
@@ -130,5 +130,5 @@ class GAApiController(ApiController):
         except ValueError, e:
             log.debug(str(e))
             pass
-        _post_analytics("CKAN API Request", str(register) + "search", id)
+        _post_analytics("CKAN API Request", str(register) + "_search", id)
         return ApiController.search(self, ver, register)
