@@ -4,6 +4,7 @@ import re
 import urllib
 
 import ckan.logic as logic
+import ckan.model as model
 from ckan.common import config
 from ckan.controllers.package import PackageController
 from ckan.controllers.api import ApiController
@@ -44,6 +45,16 @@ class GAPackageController(PackageController):
                     and all(k not in c.environ.get('HTTP_USER_AGENT', '').lower() for k in ['okhttp', 'pingdom', 'bot']):
                         _post_analytics('Resource', 'Download',
                                         urllib.quote(config.get('ckan.site_url', '')+c.environ['PATH_INFO'], ''))
+                        context = {'model': model, 'session': model.Session,
+                                   'user': c.user, 'auth_user_obj': c.userobj}
+                        try:
+                            pkg = logic.get_action('package_show')(context, {'id': id})
+                            _post_analytics('Download by Dataset', pkg['title'],
+                                        urllib.quote(config.get('ckan.site_url', '')+c.environ['PATH_INFO'], ''))
+                            _post_analytics('Download by Publisher', pkg.get('organization', {}).get('title'),
+                                        urllib.quote(config.get('ckan.site_url', '')+c.environ['PATH_INFO'], ''))
+                        except (logic.NotFound, logic.NotAuthorized):
+                            log.debug('Resource not found ', resource_id)
         except Exception, e:
             log.debug(e)
             pass
